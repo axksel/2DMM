@@ -10,13 +10,27 @@ public class SoFrame : ScriptableObject
     public float velo;
     public bool isUsed = true;
     public float normVelo;
-    public Vector2[] simi = new Vector2[343];
+    public Vector2[] simi = new Vector2[344];
+    public Vector2 orginialRoot = new Vector2(0,0);
+
+    public int[] best = new int[] { 343, 343, 343 };
 
 
+    public void ResetRootMotion()
+    {
+        orginialRoot = features[1];
 
+
+        for (int i = 0; i < features.Length; i++)
+        {
+            features[i] -= features[1];
+        }
+
+    }
 
     public float CalculateVelo(SoFrame prevFrame)
     {
+        //calculate BEFORE root motion reset!
         if (prevFrame.isUsed)
             return velo = ((features[1].x - prevFrame.features[1].x));
         else return 0;
@@ -25,7 +39,8 @@ public class SoFrame : ScriptableObject
 
     public void CalculateSim(SoFrame[] frameArray, int index)
     {
-
+        
+        //calculate AFTER root motion reset!
 
         for (int i = 0; i < frameArray.Length; i++)
             {
@@ -56,25 +71,32 @@ public class SoFrame : ScriptableObject
                 simi[i] = new Vector2(100, 100);
             }
         }
-       
-    }
 
-    public int ClosestFrame(SoFrame[] frameArray){
-        float best=200;
-        int bestFrame =700; 
+       
+     
 
         for (int i = 0; i < simi.Length; i++)
         {
-            if (best > simi[i].magnitude&& frameArray[i].normVelo>0)
+            if (simi[best[0]].magnitude > simi[i].magnitude)
             {
-                best = simi[i].magnitude;
-                bestFrame = i;
+                best[0] = i;   
+            } else if (simi[best[1]].magnitude > simi[i].magnitude)
+            {
+                best[1] = i;   
+            } else if (simi[best[2]].magnitude > simi[i].magnitude)
+            {
+                best[2] = i;
             }
+
         }
 
+    }
+
+    public int ClosestFrame(){
 
 
-        return bestFrame;   
+        return best[Random.Range(0, 3)];
+ 
     }
 
 }

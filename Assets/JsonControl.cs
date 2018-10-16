@@ -10,25 +10,36 @@ public  class JsonControl : MonoBehaviour {
     public GameObject prefab;
     public GameObject prefab2;
     public int count;
-    public static int numberOfFrames =343;
+    public Texture[] imgs;
+    public static int numberOfFrames =344;
+    public Material mat;
+  
+    
  
     public static SoFrame[] frame = new SoFrame[numberOfFrames];
 
 
     // Use this for initialization
     void Start () {
+        mat = gameObject.GetComponent<Renderer>().material;
         Application.targetFrameRate = 15;
 
 
-        SetFrames();
-        NormalizeVel();
+        SetFrames(); // load all json files into scriptable objectd
+        NormalizeVel(); // normalize the velocity, this should be done before root motion reset
+        
+        
+        // calculate the similarity between frames, this should be done after root motion reset
         for (int i = 0; i < numberOfFrames; i++)
         {
+           frame[i].ResetRootMotion();
             frame[i].CalculateSim(frame, i);
-
-         //   Debug.Log(frame[i].ClosestFrame(frame));
+           
         }
-       
+
+
+        Debug.Log(frame[50].best[0] + " " + frame[50].best[1] + " " + frame[50].best[2]);
+
 
 
     }
@@ -36,26 +47,32 @@ public  class JsonControl : MonoBehaviour {
 
     private void Update()
     {
+        
+       
 
-   
+       
+        count += 1;
+        
+        if (count == numberOfFrames)
+            count = 0;
+        
+        transform.position = new Vector3(1 - frame[count].orginialRoot.x, 1 - frame[count].orginialRoot.y, 0.51f);
+        mat.mainTexture = imgs[count];
 
-     Instantiate(prefab, new Vector3(frame[count].features[1].x, frame[count].features[1].y), Quaternion.identity);
+        
+        if (Input.GetKeyDown("space"))
+        {
+            count = frame[count].ClosestFrame();
+            Debug.Log("SPACE");
+        }
 
-
-        Debug.Log(frame[count].ClosestFrame(frame));
-
-        count = frame[count].ClosestFrame(frame);
     }
-
 
 
     void SetFrames(){
 
-
         jsonFile = new JsonObject();
         string content;
-
-
 
         for (int i = 0; i < numberOfFrames; i++)
         {
