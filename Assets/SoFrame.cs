@@ -10,10 +10,10 @@ public class SoFrame : ScriptableObject
     public float velo;
     public bool isUsed = true;
     public float normVelo;
-    public Vector2[] simi = new Vector2[344];
+    public Vector2[] simi = new Vector2[1000];
     public Vector2 orginialRoot = new Vector2(0,0);
 
-    public int[] best = new int[] { 343, 343, 343 };
+    public int[] best = new int[] { 999, 999, 999 ,999};
 
 
     public void ResetRootMotion()
@@ -23,8 +23,14 @@ public class SoFrame : ScriptableObject
 
         for (int i = 0; i < features.Length; i++)
         {
-            features[i] -= features[1];
+
+            if (0 >= features[i].x - Mathf.Epsilon && 0 <= features[i].x + Mathf.Epsilon && 0 >= features[i].y - Mathf.Epsilon && 0 <= features[i].y + Mathf.Epsilon){}
+            else
+            {
+                features[i] = features[i] - orginialRoot;
+            }
         }
+
 
     }
 
@@ -86,17 +92,45 @@ public class SoFrame : ScriptableObject
             } else if (simi[best[2]].magnitude > simi[i].magnitude)
             {
                 best[2] = i;
+            }else if (simi[best[3]].magnitude > simi[i].magnitude)
+            {
+                best[3] = i;
             }
 
         }
 
     }
 
-    public int ClosestFrame(){
+    public int RandomClosestFrame(){
 
-
-        return best[Random.Range(0, 3)];
+    
+        return best[Random.Range(0, 4)];
  
+    }
+
+    public int RightClosestFrame(SoFrame[] frameArray)
+    {
+        float high =1000;
+        int index=1000;
+
+        for (int i = 0; i < best.Length; i++)
+        {
+            if (frameArray[best[i]].normVelo < high)
+            {
+                high = frameArray[best[i]].normVelo;
+                index = best[i];
+
+            }
+
+        }
+        return index;
+    }
+
+
+    public void PrintSimiVelo(SoFrame[] frameArray){
+
+        Debug.Log(frameArray[best[0]].normVelo + " " + frameArray[best[1]].normVelo + 
+                  " " + frameArray[best[2]].normVelo + " " + frameArray[best[3]].normVelo +" "+frameArray[RightClosestFrame(frameArray)].normVelo);
     }
 
 }

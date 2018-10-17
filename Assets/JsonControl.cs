@@ -11,7 +11,7 @@ public  class JsonControl : MonoBehaviour {
     public GameObject prefab2;
     public int count;
     public Texture[] imgs;
-    public static int numberOfFrames =344;
+    public static int numberOfFrames =1000;
     public Material mat;
   
     
@@ -40,30 +40,28 @@ public  class JsonControl : MonoBehaviour {
 
         Debug.Log(frame[50].best[0] + " " + frame[50].best[1] + " " + frame[50].best[2]);
 
-
-
     }
 
 
     private void Update()
     {
-        
-       
 
-       
         count += 1;
         
         if (count == numberOfFrames)
             count = 0;
-        
+
+
         transform.position = new Vector3(1 - frame[count].orginialRoot.x, 1 - frame[count].orginialRoot.y, 0.51f);
         mat.mainTexture = imgs[count];
 
-        
-        if (Input.GetKeyDown("space"))
+
+        if (Input.GetKey("space"))
         {
-            count = frame[count].ClosestFrame();
-            Debug.Log("SPACE");
+            count = frame[count].RightClosestFrame(frame);
+            //frame[count].PrintSimiVelo(frame);
+            Debug.Log(frame[count].best[0] + " " + frame[count].best[1] + " " + frame[count].best[2]);
+
         }
 
     }
@@ -76,7 +74,7 @@ public  class JsonControl : MonoBehaviour {
 
         for (int i = 0; i < numberOfFrames; i++)
         {
-            content = System.IO.File.ReadAllText("Assets/output2/testVideo" + i.ToString("0000") + "_keypoints.json");
+            content = System.IO.File.ReadAllText("Assets/outputHand/Run Training Warm Up" + i.ToString("0000") + "_keypoints.json");
             JsonUtility.FromJsonOverwrite(content, jsonFile);
 
             if (jsonFile.people.Length == 1)
