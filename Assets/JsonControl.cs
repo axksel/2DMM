@@ -13,6 +13,8 @@ public  class JsonControl : MonoBehaviour {
     public Texture[] imgs;
     public static int numberOfFrames =1000;
     public Material mat;
+
+    public int count2;
   
     
  
@@ -23,47 +25,60 @@ public  class JsonControl : MonoBehaviour {
     void Start () {
         mat = gameObject.GetComponent<Renderer>().material;
         Application.targetFrameRate = 15;
-
+        
 
         SetFrames(); // load all json files into scriptable objectd
         NormalizeVel(); // normalize the velocity, this should be done before root motion reset
-        
-        
+
+        for (int i = 0; i < numberOfFrames-15; i++)
+        {
+            frame[i].TurnFrame(frame, i);
+            Debug.Log(frame[i].isTurnFrame);
+         
+        }
         // calculate the similarity between frames, this should be done after root motion reset
         for (int i = 0; i < numberOfFrames; i++)
         {
            frame[i].ResetRootMotion();
             frame[i].CalculateSim(frame, i);
+            
            
         }
 
 
-        Debug.Log(frame[50].best[0] + " " + frame[50].best[1] + " " + frame[50].best[2]);
+       
 
     }
 
 
     private void Update()
     {
+     
 
-        count += 1;
-        
         if (count == numberOfFrames)
             count = 0;
-
 
         transform.position = new Vector3(1 - frame[count].orginialRoot.x, 1 - frame[count].orginialRoot.y, 0.51f);
         mat.mainTexture = imgs[count];
 
-
-        if (Input.GetKey("space"))
+        if (Input.GetKeyDown("space"))
         {
-            count = frame[count].RightClosestFrame(frame);
-            //frame[count].PrintSimiVelo(frame);
-            Debug.Log(frame[count].best[0] + " " + frame[count].best[1] + " " + frame[count].best[2]);
-
+            frame[count].PrintSimiVelo(frame);
+            frame[999].PrintSimiVelo(frame);
+            count = frame[count].RandomClosestFrame();
+           
         }
+        else if( frame[count].isTurnFrame && !Input.GetKey("space"))
+        {
+            
+            count = frame[count].RandomClosestFrameNoTurn();
+           
+        }
+        else
+        {
 
+            count += 1;
+        }
     }
 
 
@@ -121,13 +136,14 @@ public  class JsonControl : MonoBehaviour {
             maxVel = frame[i].CalculateVelo(frame[i - 1]);
           
         }
-        Debug.Log(maxVel);
+      
 
         for (int i = 0; i < frame.Length; i++)
         {
             if (frame[i].isUsed)
             {
-                frame[i].normVelo = frame[i].velo/maxVel ;
+                frame[i].normVelo = frame[i].velo/maxVel;
+               
                
             }
         }

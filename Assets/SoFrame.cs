@@ -10,10 +10,14 @@ public class SoFrame : ScriptableObject
     public float velo;
     public bool isUsed = true;
     public float normVelo;
+    public float aCC;
     public Vector2[] simi = new Vector2[1000];
     public Vector2 orginialRoot = new Vector2(0,0);
+    public bool isTurnFrame = false;
+
 
     public int[] best = new int[] { 999, 999, 999 ,999};
+    public int[] bestTurn = new int[] { 999, 999, 999, 999 };
 
 
     public void ResetRootMotion()
@@ -40,6 +44,14 @@ public class SoFrame : ScriptableObject
         if (prevFrame.isUsed)
             return velo = ((features[1].x - prevFrame.features[1].x));
         else return 0;
+    }
+
+    public void CalculateACC(SoFrame prevFrame)
+    {
+        //calculate BEFORE root motion reset!
+        if (prevFrame.isUsed)
+             aCC = velo - prevFrame.velo;
+       
     }
 
 
@@ -83,18 +95,39 @@ public class SoFrame : ScriptableObject
 
         for (int i = 0; i < simi.Length; i++)
         {
-            if (simi[best[0]].magnitude > simi[i].magnitude)
+            if (simi[best[0]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame)
             {
                 best[0] = i;   
-            } else if (simi[best[1]].magnitude > simi[i].magnitude)
+            } else if (simi[best[1]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame)
             {
                 best[1] = i;   
-            } else if (simi[best[2]].magnitude > simi[i].magnitude)
+            } else if (simi[best[2]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame)
             {
                 best[2] = i;
-            }else if (simi[best[3]].magnitude > simi[i].magnitude)
+            }else if (simi[best[3]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame)
             {
                 best[3] = i;
+            }
+
+        }
+
+        for (int i = 0; i < simi.Length; i++)
+        {
+            if (simi[bestTurn[0]].magnitude > simi[i].magnitude && frameArray[i].isTurnFrame && Mathf.Sign(normVelo)==Mathf.Sign(frameArray[i].normVelo) )
+            {
+                bestTurn[0] = i;
+            }
+            else if (simi[bestTurn[1]].magnitude > simi[i].magnitude && frameArray[i].isTurnFrame && Mathf.Sign(normVelo) == Mathf.Sign(frameArray[i].normVelo))
+            {
+                bestTurn[1] = i;
+            }
+            else if (simi[bestTurn[2]].magnitude > simi[i].magnitude && frameArray[i].isTurnFrame && Mathf.Sign(normVelo) == Mathf.Sign(frameArray[i].normVelo))
+            {
+                bestTurn[2] = i;
+            }
+            else if (simi[bestTurn[3]].magnitude > simi[i].magnitude && frameArray[i].isTurnFrame && Mathf.Sign(normVelo) == Mathf.Sign(frameArray[i].normVelo))
+            {
+                bestTurn[3] = i;
             }
 
         }
@@ -104,33 +137,40 @@ public class SoFrame : ScriptableObject
     public int RandomClosestFrame(){
 
     
-        return best[Random.Range(0, 4)];
+        return bestTurn[Random.Range(0, 4)];
  
     }
 
-    public int RightClosestFrame(SoFrame[] frameArray)
+
+    public int RandomClosestFrameNoTurn()
     {
-        float high =1000;
-        int index=1000;
 
-        for (int i = 0; i < best.Length; i++)
+
+        return best[Random.Range(0, 4)];
+
+    }
+
+   
+    
+
+    public void TurnFrame(SoFrame[] frameArray, int index)
+    {
+        
+        if(Mathf.Sign(normVelo) != Mathf.Sign(frameArray[index + 10].normVelo) && normVelo != 0 && frameArray[index + 10].normVelo !=0)
         {
-            if (frameArray[best[i]].normVelo < high)
-            {
-                high = frameArray[best[i]].normVelo;
-                index = best[i];
-
-            }
+            isTurnFrame = true;
 
         }
-        return index;
+
+
     }
+
 
 
     public void PrintSimiVelo(SoFrame[] frameArray){
 
-        Debug.Log(frameArray[best[0]].normVelo + " " + frameArray[best[1]].normVelo + 
-                  " " + frameArray[best[2]].normVelo + " " + frameArray[best[3]].normVelo +" "+frameArray[RightClosestFrame(frameArray)].normVelo);
+        Debug.Log(frameArray[bestTurn[0]].normVelo + " " + frameArray[bestTurn[1]].normVelo + 
+                  " " + frameArray[bestTurn[2]].normVelo + " " + frameArray[bestTurn[3]].normVelo);
     }
 
 }
