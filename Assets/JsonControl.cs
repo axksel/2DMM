@@ -30,7 +30,7 @@ public  class JsonControl : MonoBehaviour {
         SetFrames(); // load all json files into scriptable objectd
         NormalizeVel(); // normalize the velocity, this should be done before root motion reset
 
-        for (int i = 0; i < numberOfFrames-15; i++)
+        for (int i = 1; i < numberOfFrames-20; i++)
         {
             frame[i].TurnFrame(frame, i);
             Debug.Log(frame[i].isTurnFrame);
@@ -59,7 +59,14 @@ public  class JsonControl : MonoBehaviour {
             count = 0;
 
         transform.position = new Vector3(1 - frame[count].orginialRoot.x, 1 - frame[count].orginialRoot.y, 0.51f);
+        if(frame[count].isTurnFrame){
+
+            Instantiate(prefab, new Vector3(1 - frame[count].orginialRoot.x, 1 - frame[count].orginialRoot.y, 0), Quaternion.identity);
+        }
+
         mat.mainTexture = imgs[count];
+
+
 
         if (Input.GetKeyDown("space"))
         {

@@ -46,13 +46,6 @@ public class SoFrame : ScriptableObject
         else return 0;
     }
 
-    public void CalculateACC(SoFrame prevFrame)
-    {
-        //calculate BEFORE root motion reset!
-        if (prevFrame.isUsed)
-             aCC = velo - prevFrame.velo;
-       
-    }
 
 
     public void CalculateSim(SoFrame[] frameArray, int index)
@@ -63,7 +56,7 @@ public class SoFrame : ScriptableObject
         for (int i = 0; i < frameArray.Length; i++)
             {
 
-            if (frameArray[i].isUsed && index !=i)
+            if (frameArray[i].isUsed && index !=i &&frameArray[i].isUsed && index != i-1 && index != i - 2)
             {
 
                 simi[i] += features[0] - frameArray[i].features[0];
@@ -95,16 +88,16 @@ public class SoFrame : ScriptableObject
 
         for (int i = 0; i < simi.Length; i++)
         {
-            if (simi[best[0]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame)
+            if (simi[best[0]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame && Mathf.Sign(normVelo) == Mathf.Sign(frameArray[i].normVelo))
             {
                 best[0] = i;   
-            } else if (simi[best[1]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame)
+            } else if (simi[best[1]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame && Mathf.Sign(normVelo) == Mathf.Sign(frameArray[i].normVelo))
             {
                 best[1] = i;   
-            } else if (simi[best[2]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame)
+            } else if (simi[best[2]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame && Mathf.Sign(normVelo) == Mathf.Sign(frameArray[i].normVelo))
             {
                 best[2] = i;
-            }else if (simi[best[3]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame)
+            }else if (simi[best[3]].magnitude > simi[i].magnitude && !frameArray[i].isTurnFrame && Mathf.Sign(normVelo) == Mathf.Sign(frameArray[i].normVelo))
             {
                 best[3] = i;
             }
@@ -156,7 +149,8 @@ public class SoFrame : ScriptableObject
     public void TurnFrame(SoFrame[] frameArray, int index)
     {
         
-        if(Mathf.Sign(normVelo) != Mathf.Sign(frameArray[index + 10].normVelo) && normVelo != 0 && frameArray[index + 10].normVelo !=0)
+        if(Mathf.Sign(normVelo) != Mathf.Sign(frameArray[index + 10].normVelo) && Mathf.Sign(normVelo) != Mathf.Sign(frameArray[index + 20].normVelo) && Mathf.Sign(normVelo) == Mathf.Sign(frameArray[index -1].normVelo)
+           && normVelo != 0 && frameArray[index + 10].normVelo !=0)
         {
             isTurnFrame = true;
 
